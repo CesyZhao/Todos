@@ -12,46 +12,58 @@ export class MySubClassedDexie extends Dexie {
   constructor() {
     super('myDatabase');
     this.version(1).stores({
-      todos: 'key, date, parentKey' // Primary key and indexed props
+      todos: 'key, date, parentKey, progress, active' // Primary key and indexed props
     });
   }
 
   getTodayTodos() {
+    console.log('called-------');
     const date = dayjs().format('YYYY-MM-DD');
-    const todos = useObservable(liveQuery(() => {
+    return liveQuery(() => {
       return this.todos
       .where("date").equals(date)
       .toArray();
-    }));
-    return todos;
+    });
   }
 
   getLast7daysTodos() {
     const endDate = dayjs().format('YYYY-MM-DD');
     const dates = [];
 
-    for (let i = 1; i <=7; i++) {
+    for (let i = 1; i <7; i++) {
       dates.push(dayjs().subtract(i, 'day').format('YYYY-MM-DD'));
     }
 
-    const todos = useObservable(liveQuery(() => {
+    dates.push(endDate);
+
+    return liveQuery(() => {
       return this.todos
       .where("date").anyOf(dates)
       .toArray();
-    }));
-    return todos;
+    });
   }
 
   getFinishedTodos() {
-
+    return liveQuery(() => {
+      return this.todos
+      .where("progress").equals(100)
+      .toArray();
+    });
   }
 
   getDeletedTodos() {
-
+    return liveQuery(() => {
+      return this.todos
+      .where("active").equals(0)
+      .toArray();
+    });
   }
 
   getAllTodos() {
-
+    return liveQuery(() => {
+      return this.todos
+      .toArray();
+    });
   }
 }
 

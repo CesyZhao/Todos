@@ -35,3 +35,9 @@ export const generateList = (list: TodoItem[], key: string) => {
   delete map.get(key).children;
   return newList;
 }
+
+export const getListOfDay = (list: TodoItem[], day: string) => {
+  return list.filter(item => {
+    return item.date === day;
+  })
+}

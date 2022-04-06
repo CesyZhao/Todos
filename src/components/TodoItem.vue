@@ -1,5 +1,5 @@
 <template>
-  <div class="todo-item">
+  <div class="todo-item" :class="{ finished: todo.progress === 100, deleted: todo.active === 0 }">
     <div class="todo-title-wrapper" @click.stop="$emit('todoClick', todo)">
       <icon-down v-if="isCategory" class="title-icon" size="16" />
       <template v-else>
@@ -17,7 +17,7 @@
         @input="handleTodoChange" />
       <div class="todo-info" v-if="!isCategory">
         <div>{{ date }}</div>
-        <IconDelete />
+        <IconDelete @click="handleDelete" />
       </div>
     </div>
     <div class="todo-children" v-if="todo.children?.length">
@@ -79,10 +79,21 @@ const handleTodoChange = () => {
    emit('itemStatusChange', { todo: todo.value })
 }
 
+const handleDelete = () => {
+  emit('itemStatusChange', { todo: { ...todo.value, active: 0  }})
+}
+
 </script>
 
 <style lang="less" scoped>
 .todo-item {
+  position: relative;
+  &.finished, &.deleted{
+    color: #aaa;
+    .todo-title {
+      color: #aaa !important;
+    }
+  }
   .todo-title-wrapper {
     display: flex;
     height: 28px;

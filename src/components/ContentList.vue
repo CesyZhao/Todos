@@ -29,6 +29,7 @@
         </a-date-picker>
       </template>
     </a-input>
+    <!-- {{ todoList1 }} -->
     <todo-list :list="todoList" @todo-click="handleTodoClick" @add-todo="handleAddTodo" @item-status-change="handleTodoStatusChange" />
     <!-- <a-tree :data="todoList" show-line class="todo-list">
       <template #switcher-icon>
@@ -49,7 +50,8 @@ import dayjs from 'dayjs';
 import { LevelItem } from '../types/level';
 import { TodoItem } from '../types/todo';
 import TodoList from './TodoList.vue';
-import { getDisplayDate } from '../utils';
+import { createUuid, getDisplayDate } from '../utils';
+import menus, { Menu } from '../contants/menu';
 
 const store = useContentStore();
 
@@ -86,41 +88,51 @@ const todoList = computed(() => {
     content: '已完成',
     children: [] as TodoItem[],
   }
-  console.log(store.todoListMap, 'map-------');
-  const dates = store.todoListMap.keys();
 
-  for (const date of dates) {
-    const groupTodo = {
-      key: date,
-      content: getDisplayDate(date),
-      children: [],
+  const todos: TodoItem[] = store.todoList.value || [];
+
+  console.log(todos, 'todos------');
+
+  const tempMap = {} as Record<string, any>;
+  const isNotMenuDone = store.activeMenu.key !== Menu.Done;
+  const isNotMenuDelete = store.activeMenu.key !== Menu.Deleted;
+  for (const todo of todos) {
+    if (todo.parentKey || (!todo.active && isNotMenuDelete)) continue;
+    if (todo.progress === 100 && isNotMenuDone) {
+      finishedTodo.children.push(todo);
+      continue;
     }
-    const list = store.todoListMap.get(date)?.value || [];
-
-    console.log(list, '++++++-----');
-    for (const todo of list) {
-      if (todo.parentKey) continue;
-      if (todo.progress === 100) {
-        finishedTodo.children.push(todo);
-      } else {
-        groupTodo.children.push(todo);
-      }
+    if (!tempMap[todo.date]) {
+      tempMap[todo.date] = []
     }
-
-    groupTodo.children.length && tree.push(groupTodo);
+    tempMap[todo.date].push(todo);
   }
-  if (finishedTodo.children.length) tree.push(finishedTodo);
+  const entries = Object.entries(tempMap);
+  for (const entry of entries) {
+    const [date, list] = entry;
+    if (list.length) {
+      const groupTodo = {
+        key: date,
+        content: getDisplayDate(date),
+        children: list,
+      }
+      tree.push(groupTodo);
+    }
+  }
+
+  finishedTodo.children.length && tree.push(finishedTodo);
+
   return tree;
 });
 const addTodo = () => {
-  const list = store.todoListMap.get(date.value);
 
   const todo = {
-    key: date.value + '--' + ((list?.length || 0) + 1),
+    key: createUuid(),
     level: currentLevel.value,
     date: date.value,
     content: input.value,
-    progress: 0
+    progress: 0,
+    active: 1
   }
   store.addTodo(todo, date.value)
 }
@@ -128,21 +140,19 @@ const handleTodoClick = (todo: TodoItem) => {
   store.setCurrentTodo(todo);
 }
 const handleAddTodo = (todo: TodoItem) => {
-  const list = store.todoListMap.get(date.value);
-  const index = list.findIndex((item: TodoItem) => item.key === todo.key);
   const newTodo = {
-    key: date.value + '--' + ((list?.length || 0) + 1),
+    key: createUuid(),
     level: todo.level,
     date: todo.date,
     content: '',
-    progress: 0
+    progress: 0,
+    active: 1
   }
-  store.addTodo(newTodo, date.value, index);
+  store.addTodo(newTodo, date.value);
   handleTodoClick(newTodo);
 }
 
 const handleTodoStatusChange = ({ todo }) => {
-  console.log(todo, '+++++++')
   store.updateTodo(todo);
 }
 </script>

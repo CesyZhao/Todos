@@ -12,8 +12,8 @@
         </div>
       </div>
       <div class="content-detail">
-        <input class="content-detail-title" v-model="currentTodo.content" placeholder="请输入任务标题" />
-        <a-textarea auto-size class="content-detail-description" v-model="currentTodo.description" placeholder="请输入任务描述" />
+        <input class="content-detail-title" v-model="currentTodo.content" placeholder="请输入任务标题" @input="handleTodoChange" />
+        <a-textarea auto-size class="content-detail-description" v-model="currentTodo.description" placeholder="请输入任务描述"  @input="handleTodoChange"  />
       </div>
       <todo-list :list="todoList" />
       <div class="fix-button">
@@ -32,7 +32,7 @@ import dayjs from 'dayjs';
 import { computed } from 'vue-demi';
 import { Level } from '../contants/level';
 import useContentStore from '../store/content';
-import { generateList } from '../utils';
+import { createUuid, generateList } from '../utils';
 import TodoList from './TodoList.vue';
 
 const store = useContentStore();
@@ -55,14 +55,14 @@ const date = computed(() => {
 })
 
 const list = computed(() => {
-  return store.todoListMap.get(currentTodo.value.date)?.value;
+  return store.todoList.value;
 })
 
 const addTodo = () => {
   const { value: todo } = currentTodo;
 
   const newTodo = {
-    key: todo.date + '--' + ((list?.value.length || 0) + 1),
+    key: createUuid(),
     level: todo.level,
     date: todo.date,
     content: '',
@@ -75,9 +75,12 @@ const addTodo = () => {
 
 const todoList = computed(() => {
   const newList = generateList(list.value, currentTodo.value.key);
-  console.log(newList, 'newList-------');
   return newList;
 })
+
+const handleTodoChange = () => {
+  store.updateTodo(currentTodo.value);
+}
 
 </script>
 

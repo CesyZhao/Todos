@@ -24,24 +24,50 @@ export default defineStore({
   },
 
   getters: {
+
+    todoList() {
+      const { activeMenu } = this;
+      const { key } = activeMenu;
+
+       const handlerMap = new Map([
+        [Menu.Today, db.getTodayTodos.bind(db)],
+        [Menu.Last7Days, db.getLast7daysTodos.bind(db)],
+        [Menu.Done, db.getFinishedTodos.bind(db)],
+        [Menu.Deleted, db.getDeletedTodos.bind(db)],
+        [Menu.Overview, db.getAllTodos.bind(db)],
+      ])
+
+      const result = handlerMap.get(key)?.();
+
+      return useObservable(result);
+      
+    },
     todoListMap() {
       const { activeMenu } = this;
       const { key } = activeMenu;
 
       const map = new Map();
 
-      const handlerMap = new Map([
-        [Menu.Today, db.getTodayTodos.bind(db)],
-        [Menu.Last7Days, db.getLast7daysTodos.bind(db)],
-        [Menu.Done, db.getFinishedTodos],
-        [Menu.Abandon, db.getDeletedTodos],
-        [Menu.Overview, db.getAllTodos],
-      ])
+      // const handlerMap = new Map([
+      //   [Menu.Today, db.getTodayTodos.bind(db)],
+      //   [Menu.Last7Days, db.getLast7daysTodos.bind(db)],
+      //   [Menu.Done, db.getFinishedTodos],
+      //   [Menu.Abandon, db.getDeletedTodos],
+      //   [Menu.Overview, db.getAllTodos],
+      // ])
+      // const date = dayjs().format('YYYY-MM-DD');
+
+      // const todos = handlerMap.get(key)?.() || [];
+
+
+
       const date = dayjs().format('YYYY-MM-DD');
-
-      const todos = handlerMap.get(key)?.() || [];
-
-      console.log(todos, '+++++++')
+      const result = liveQuery(() => {
+        return db.todos
+        .where("date").equals(date)
+        .toArray();
+      });
+      const todos = useObservable(result as any);
 
       // const groupedList = groupBy(todos, 'date');
 
@@ -64,7 +90,8 @@ export default defineStore({
     setChosenLevel(level: LevelItem) {
       this.chosenLevel = level
     },
-    updateTodo(todo) {
+    updateTodo(todo: TodoItem) {
+      if (todo.progress === true) { todo.progress = 100 };
       db.todos.update(todo.key, todo);
     },
     addTodo(todo: TodoItem, date: string, index?: number) {
