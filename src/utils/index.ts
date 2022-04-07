@@ -26,9 +26,7 @@ export const generateList = (list: TodoItem[], key: string) => {
       parentTodo.children.push(item)
     }
     // 避免影响其他层级的任务
-    if (item.key.includes(key)) {
-      map.set(item.key, item);
-    }
+    map.set(item.key, item);
   }
   const newList = map.get(key).children || [];
   // 删除掉当前任务的 children，避免污染

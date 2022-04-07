@@ -9,6 +9,7 @@
     "electron:serve": "electron ."
   },
   "dependencies": {
+    "@arco-design/web-vue": "^2.16.2",
     "@vueuse/rxjs": "^8.2.2",
     "ant-design-vue": "^2.2.8",
     "dayjs": "^1.11.0",
@@ -21,7 +22,6 @@
     "vue-js-modal": "^2.0.1"
   },
   "devDependencies": {
-    "@arco-design/web-vue": "^2.16.2",
     "@vitejs/plugin-vue": "^2.0.0",
     "electron": "^16.0.8",
     "less": "^4.1.2",

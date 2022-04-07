@@ -30,15 +30,18 @@
       </template>
     </a-input>
     <!-- {{ todoList1 }} -->
-    <todo-list :list="todoList" @todo-click="handleTodoClick" @add-todo="handleAddTodo" @item-status-change="handleTodoStatusChange" />
-    <!-- <a-tree :data="todoList" show-line class="todo-list">
-      <template #switcher-icon>
+    <!-- <todo-list :list="todoList" @todo-click="handleTodoClick" @add-todo="handleAddTodo" @item-status-change="handleTodoStatusChange" /> -->
+    <a-tree :data="todoList" show-line class="todo-list" :checkable="true">
+      <!-- <template #switcher-icon>
         <IconDown />
+      </template> -->
+      <template #icon>
+        <IconStar />
       </template>
       <template #title="node">
         {{ node.content }}
       </template>
-    </a-tree> -->
+    </a-tree>
   </div>
 </template>
 
@@ -115,6 +118,7 @@ const todoList = computed(() => {
         key: date,
         content: getDisplayDate(date),
         children: list,
+        checkable: false,
       }
       tree.push(groupTodo);
     }

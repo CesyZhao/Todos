@@ -5,6 +5,7 @@
       :todo="todo" :key="todo.key"
       @todo-click="(todo) => $emit('todoClick', todo)"
       @add-todo="(todo) => $emit('addTodo', todo)"
+      @add-sub-todo="(todo) => $emit('addSubTodo', todo)"
       @item-status-change="(e) => $emit('itemStatusChange', e)" />
   </div>
 </template>
@@ -21,11 +22,6 @@ interface Props {
 const props = defineProps<Props>();
 const { list } = toRefs(props);
 
-watch(list, () => {
-  console.log('changed-------');
-})
-
-console.log(list, '++++++++---');
 </script>
 
 <style lang="less" scoped>

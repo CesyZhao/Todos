@@ -3,8 +3,9 @@
     <div class="todo-title-wrapper" @click.stop="$emit('todoClick', todo)">
       <icon-down v-if="isCategory" class="title-icon" size="16" />
       <template v-else>
-        <a-progress v-if="todo.children?.length" :color="color" :percent="todo.progress" size="mini" class="title-icon" />
-        <a-checkbox v-else class="title-icon" @change="handleTodoChange" :value="100" v-model="todo.progress"></a-checkbox>
+        <!-- <a-progress v-if="todo.children?.length" :color="color" :percent="todo.progress" size="mini" class="title-icon" /> -->
+        <icon-mind-mapping @click.stop="$emit('addSubTodo', todo)" />
+        <a-checkbox class="title-icon" @change="handleTodoChange" :value="100" v-model="todo.progress"></a-checkbox>
       </template>
       <input
         ref="inputRef"
@@ -26,6 +27,7 @@
         :key="t.key"
         :todo="t" @todo-click="(todo) => $emit('todoClick', todo)"
         @add-todo="(todo) => $emit('addTodo', todo)"
+        @add-sub-todo="(todo) => $emit('addSubTodo', todo)"
         @item-status-change="(e) => $emit('itemStatusChange', e)" />
     </div>
   </div>
