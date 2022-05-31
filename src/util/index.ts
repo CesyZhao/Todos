@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { TodoItem } from '../types/todo';
+import { TodoItem } from '../defination/todo';
 
 export const createUuid = () => {
   var temp_url = URL.createObjectURL(new Blob());
@@ -28,7 +28,7 @@ export const generateList = (list: TodoItem[], key: string) => {
     // 避免影响其他层级的任务
     map.set(item.key, item);
   }
-  const newList = map.get(key).children || [];
+  const newList = map.get(key)?.children || [];
   // 删除掉当前任务的 children，避免污染
   delete map.get(key).children;
   return newList;
@@ -38,4 +38,9 @@ export const getListOfDay = (list: TodoItem[], day: string) => {
   return list.filter(item => {
     return item.date === day;
   })
+}
+
+export const formatDate = (date: string) => {
+  console.log(date, 'date-------');
+  return date === dayjs().format('YYYY-MM-DD') ? '今天' : dayjs(date).format('MM-DD');
 }

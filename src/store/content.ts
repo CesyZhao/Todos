@@ -1,14 +1,14 @@
 import { defineStore } from 'pinia';
-import menus, { Menu } from '../contants/menu';
-import { MenuItem } from '../types/menu';
+import menus, { Menu } from '../defination/menu';
+import { MenuItem } from '../defination/menu';
 import dayjs from 'dayjs';
-import levels from '../contants/level';
-import { LevelItem } from '../types/level';
-import { TodoItem } from '../types/todo';
-import { db } from '../utils/db';
-import { groupBy, map } from 'lodash';
+import PriorityList, { PriorityItem } from '../defination/priority';
+import { TodoItem } from '../defination/todo';
+import { db } from '../util/db';
+import { groupBy, map, debounce } from 'lodash';
 import { liveQuery } from "dexie";
 import { useObservable } from "@vueuse/rxjs";
+import { Message } from '@arco-design/web-vue';
 
 
 export default defineStore({
@@ -18,7 +18,7 @@ export default defineStore({
     return {
       activeMenu: menus[0],
       chosenDate: dayjs().format('YYYY-MM-DD'),
-      chosenLevel: levels[levels.length - 1],
+      chosenPriority: PriorityList[PriorityList.length - 1],
       currentTodo: {} as TodoItem,
     }
   },
@@ -87,16 +87,41 @@ export default defineStore({
     setChosenDate(date: string) {
       this.chosenDate = date
     },
-    setChosenLevel(level: LevelItem) {
-      this.chosenLevel = level
+    setChosenPriority(priority: PriorityItem) {
+      this.chosenPriority = priority
     },
-    updateTodo(todo: TodoItem) {
-      if (todo.progress === true) { todo.progress = 100 };
-      db.todos.update(todo.key, todo);
-    },
+    updateTodo: debounce((todo: TodoItem) => {
+      db.todos.update(todo.key, todo)
+        .then(() => {
+          Message.success({
+            content: '任务修改成功',
+            position: 'bottom'
+          })
+        })
+        .catch(() => {
+          Message.error({
+            content: '任务修改失败',
+            position: 'bottom'
+          })
+        })
+    }, 500),
     addTodo(todo: TodoItem, date: string, index?: number) {
+      console.log(todo, '--------')
       // const list = this.todoListMap.get(date) || [];
-      db.todos.add(todo);
+      db.todos.add(todo)
+        .then(() => {
+          Message.success({
+            content: '新建任务成功',
+            position: 'bottom'
+          })
+        })
+        .catch((err) => {
+          console.log(err);
+          Message.error({
+            content: '新建任务失败',
+            position: 'bottom'
+          })
+        })
       // index ? list.splice(index + 1, 0, todo) : list.push(todo);
       // this.todoListMap.set(date, list);
     },

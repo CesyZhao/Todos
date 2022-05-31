@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import Menu from './components/Menu.vue';
-import Content from './components/Content.vue';
+import Menu from './component/Menu.vue';
+import Content from './component/Content.vue';
 </script>
 
 <template>

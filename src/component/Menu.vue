@@ -13,10 +13,9 @@
 </template>
 
 <script lang="ts" setup>
-import menus from '../contants/menu';
+import menus from '../defination/menu';
 import { reactive } from 'vue';
 import useContentStore from '../store/content';
-import { MenuItem } from '../types/menu';
 
 const menuList = reactive(menus);
 

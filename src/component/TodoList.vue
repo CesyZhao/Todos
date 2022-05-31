@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { TodoItem as ITodoItem } from "../types/todo";
+import { TodoItem as ITodoItem } from "../defination/todo";
 import TodoItem from './TodoItem.vue';
 import { toRefs, watch } from 'vue';
 

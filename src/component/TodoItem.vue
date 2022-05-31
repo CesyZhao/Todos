@@ -34,8 +34,8 @@
 </template>
 
 <script lang="ts" setup>
-import { Level } from "../contants/level";
-import { TodoItem as ITodoItem } from "../types/todo";
+import { PriorityColorMap } from "../defination/priority";
+import { TodoItem as ITodoItem } from "../defination/todo";
 import { computed, toRefs, onMounted, ref, defineEmits, watch } from 'vue';
 import dayjs from "dayjs";
 
@@ -57,15 +57,7 @@ onMounted(() => {
   }
 })
 
-const LevelColorMap = new Map([
-  [Level.High, 'var(--color-danger-light-4)'],
-  [Level.Medium, 'rgb(var(--orangered-4))'],
-  [Level.Normal, 'var(--color-primary-light-4)'],
-  [Level.Low, '#888888'],
-]);
-
-
-const color = LevelColorMap.get(todo.value.level);
+const color = PriorityColorMap.get(todo.value.level);
 
 const isCategory = todo.value.progress === undefined;
 

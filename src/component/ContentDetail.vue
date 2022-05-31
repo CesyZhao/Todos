@@ -5,7 +5,6 @@
     </div>
     <template v-else>
       <div class="content-detail-header">
-        <a-progress :color="color" :percent="currentTodo.progress" size="mini" class="title-icon" />
         <div class="content-detail-date">
           <IconCalendar />
           {{ date }}
@@ -13,10 +12,12 @@
       </div>
       <div class="content-detail">
         <input class="content-detail-title" v-model="currentTodo.content" placeholder="请输入任务标题" @input="handleTodoChange" />
-        <a-textarea auto-size class="content-detail-description" v-model="currentTodo.description" placeholder="请输入任务描述"  @input="handleTodoChange"  />
+        <div id="richText"></div>
+        <!-- <a-textarea auto-size class="content-detail-description" v-model="currentTodo.description" placeholder="请输入任务描述"  @input="handleTodoChange"  /> -->
       </div>
-      <todo-list :list="todoList" @add-sub-todo="addTodo" />
+      <todo-list :list="todoList" @add-sub-todo="addTodo" class="todo-list" />
       <div class="fix-button">
+        <a-progress :color="color" :percent="currentTodo.progress" class="title-icon" type="circle" />
         <a-button type="primary" @click="addTodo">
           <template #icon>
             <icon-plus />
@@ -29,12 +30,15 @@
 
 <script lang="ts" setup>
 import dayjs from 'dayjs';
-import { computed } from 'vue-demi';
-import { Level } from '../contants/level';
+import { computed, nextTick, onMounted, watch } from 'vue-demi';
+import { PriorityColorMap } from '../defination/priority';
 import useContentStore from '../store/content';
-import { TodoItem } from '../types/todo';
-import { createUuid, generateList } from '../utils';
+import { TodoItem } from '../defination/todo';
+import { createUuid, generateList } from '../util';
 import TodoList from './TodoList.vue';
+import Quill from 'quill';
+import 'quill/dist/quill.snow.css'
+import { ref } from 'vue';
 
 const store = useContentStore();
 
@@ -42,14 +46,8 @@ const currentTodo = computed(() => {
   return store.currentTodo;
 })
 
-const LevelColorMap = new Map([
-  [Level.High, 'var(--color-danger-light-4)'],
-  [Level.Medium, 'rgb(var(--orangered-4))'],
-  [Level.Normal, 'var(--color-primary-light-4)'],
-  [Level.Low, '#888888'],
-]);
 
-const color = LevelColorMap.get(currentTodo.value.level);
+const color = PriorityColorMap.get(currentTodo.value.level);
 
 const date = computed(() => {
   return currentTodo.value.date === dayjs().format('YYYY-MM-DD') ? '今天' : dayjs(currentTodo.value.date).format('MM-DD');
@@ -69,10 +67,9 @@ const addTodo = (parentTodo: TodoItem) => {
     date: todo.date,
     content: '',
     progress: 0,
-    parentKey: todo.key
+    parentKey: todo.key,
+    active: 1
   }
-
-  console.log(newTodo, 'newTodo--------');
 
   store.addTodo(newTodo, currentTodo.value.date);
 }
@@ -87,15 +84,38 @@ const handleTodoChange = () => {
   store.updateTodo(currentTodo.value);
 }
 
+let quill;
+
+watch(currentTodo, () => {
+  nextTick(() => {
+    if (!quill) {
+      const container = document.getElementById('richText');
+      quill = new Quill(container, {
+        modules: {
+          toolbar: [
+              [{ header: [1, 2, false] }],
+              ['bold', 'italic', 'underline'],
+              ['image', 'code-block']
+            ]
+          },
+        placeholder: '请输入任务描述',
+        theme: 'snow'
+      })
+    }
+    quill.setText(currentTodo.value.description || '' + '\n');
+  })
+})
+
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 .content-detail {
   &-wrapper {
     height: 100%;
     display: flex;
     flex-direction: column;
     padding: 24px;
+    box-sizing: border-box;
     .empty {
       flex: 1;
       display: flex;
@@ -127,9 +147,21 @@ const handleTodoChange = () => {
     }
   }
 }
+.todo-list {
+  flex: 1;
+}
 .fix-button {
-  position: absolute;
-  right: 24px;
-  bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ql-toolbar {
+  // margin: 0  -24px;
+  border: none !important;
+  border-top: 1px solid #eee !important;
+  border-bottom: 1px solid #eee !important;
+}
+#richText {
+  border: none;
 }
 </style>

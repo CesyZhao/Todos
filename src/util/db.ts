@@ -1,7 +1,7 @@
 import { useObservable } from '@vueuse/rxjs';
 import dayjs from 'dayjs';
 import Dexie, { liveQuery, Table } from 'dexie';
-import { TodoItem } from '../types/todo';
+import { TodoItem } from '../defination/todo';
 
 
 export class MySubClassedDexie extends Dexie {
@@ -12,50 +12,51 @@ export class MySubClassedDexie extends Dexie {
   constructor() {
     super('myDatabase');
     this.version(1).stores({
-      todos: 'key, date, parentKey, progress, active' // Primary key and indexed props
+      todos: 'key, date, parentKey, progress, active, createTime' // Primary key and indexed props
     });
   }
 
   getTodayTodos() {
-    console.log('called-------');
     const date = dayjs().format('YYYY-MM-DD');
     return liveQuery(() => {
       return this.todos
-      .where("date").equals(date)
-      .toArray();
+      .where("date")
+      .equals(date)
+      .sortBy('createTime');
     });
   }
 
   getLast7daysTodos() {
     const endDate = dayjs().format('YYYY-MM-DD');
-    const dates = [];
+    const dates = [endDate];
 
-    for (let i = 1; i <7; i++) {
-      dates.push(dayjs().subtract(i, 'day').format('YYYY-MM-DD'));
+    for (let i = 1; i <4; i++) {
+      dates.unshift(dayjs().subtract(i, 'day').format('YYYY-MM-DD'));
+      dates.push(dayjs().add(i, 'day').format('YYYY-MM-DD'));
     }
-
-    dates.push(endDate);
-
     return liveQuery(() => {
       return this.todos
-      .where("date").anyOf(dates)
-      .toArray();
+      .where("date")
+      .anyOf(dates)
+      .sortBy('createTime');
     });
   }
 
   getFinishedTodos() {
     return liveQuery(() => {
       return this.todos
-      .where("progress").equals(100)
-      .toArray();
+      .where("progress")
+      .equals(100)
+      .sortBy('createTime');
     });
   }
 
   getDeletedTodos() {
     return liveQuery(() => {
       return this.todos
-      .where("active").equals(0)
-      .toArray();
+      .where("active")
+      .equals(0)
+      .sortBy('createTime');
     });
   }
 
