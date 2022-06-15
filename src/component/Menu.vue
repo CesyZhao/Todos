@@ -22,7 +22,6 @@ const menuList = reactive(menus);
 const store = useContentStore();
 
 const onClickMenuItem = (key: string) => {
-  console.log('+++++++++++');
   const menuItem = menus.find(m => m.key === key) || menus[0];
   store.changeActiveMenu(menuItem);
 }

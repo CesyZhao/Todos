@@ -3,19 +3,10 @@
     <h2>{{ activeMenu.title }}</h2>
     <a-input placeholder="回车即可创建任务" allow-clear @keydown.enter="addTodo" v-model="input">
       <template #prefix>
-	      <priority-picker :priority="currentPriority" @change="handlePriorityChange"></priority-picker>
+	      <priority-picker v-model="currentPriority"></priority-picker>
       </template>
       <template #suffix>
-	      <date-picker></date-picker>
-<!--        <a-date-picker-->
-<!--          position="tr"-->
-<!--          v-model="date"-->
-<!--        >-->
-<!--          <div class="icon icon-calendar">-->
-<!--            <icon-calendar  size="14" />-->
-<!--            <span>{{ displayDaye }}</span>-->
-<!--          </div> -->
-<!--        </a-date-picker>-->
+	      <date-picker v-model="dateConfig"></date-picker>
       </template>
     </a-input>
     <!-- {{ todoList1 }} -->
@@ -39,7 +30,7 @@
             @keydown.enter="addTodo('')"
             @input="handleTodoChange(node)" />
           <div class="todo-info" v-if="node.progress !== undefined">
-            <div>{{ getFormatDate(node.date) }}</div>
+	          <date-picker :model-value="node" @update:modelValue="handleTodoChange(node)"></date-picker>
             <IconDelete @click="handleDelete(node)" class="icon-delete" />
           </div>
         </div>
@@ -50,11 +41,11 @@
 
 <script lang="ts" setup>
 import useContentStore from '../store/content';
-import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { PriorityItem } from '../defination/priority';
 import { TodoItem } from '../defination/todo';
 import { createUuid, getDisplayDate } from '../util';
-import menus, { Menu } from '../defination/menu';
+import { Menu } from '../defination/menu';
 import { formatDate } from '../util';
 import { isString } from 'lodash';
 import Todo from '../module/Todo';
@@ -65,20 +56,18 @@ const store = useContentStore();
 
 const activeMenu = computed(() => store.activeMenu);
 
-const handlePriorityChange = (priority: PriorityItem) => {
-	console.log('change------', priority)
-  store.setChosenPriority(priority);
-}
-const currentPriority = computed(() => store.chosenPriority);
-
-const date = computed({
-  get: () => store.chosenDate,
-  set: (val) => store.setChosenDate(val)
+const currentPriority = computed({
+	get: () => store.chosenPriority,
+	set: (priority) => {
+		console.log(priority, '==========');
+		store.setChosenPriority(priority)
+	},
 });
 
-const displayDaye = computed(() => {
-  return getDisplayDate(date.value);
-})
+const dateConfig = computed({
+  get: () => store.dateConfig,
+  set: (val) => store.setDateConfig(val)
+});
 
 const input = ref('');
 const checkedKeys = ref<string[]>([]);
@@ -101,17 +90,17 @@ const todoList = computed(() => {
   const isNotMenuDelete = key !== Menu.Deleted;
 
   for (const todo of todos) {
-    const { date } = todo;
+    const { startDate } = todo;
     if (todo.parentKey || (!todo.active && isNotMenuDelete)) continue;
     if (todo.progress === 100 && isNotMenuDone) {
       checkedKeys.value.push(todo.key);
       finishedTodo.children.push(todo);
       continue;
     }
-    if (!tempMap[date]) {
-      tempMap[date] = []
+    if (!tempMap[startDate]) {
+      tempMap[startDate] = []
     }
-    tempMap[date].push(todo);
+    tempMap[startDate].push(todo);
   }
 
   const entries = Object.entries(tempMap);
@@ -147,14 +136,13 @@ watch(todoList, () => {
 })
 
 const addTodo = (content: string) => {
-
+	console.log(dateConfig.value, '0000')
 	const todo = new Todo({
-		level: currentLevel.value,
-		date: date.value,
+		priority: currentPriority.value.key,
 		content: isString(content) ? content : input.value,
+		...dateConfig.value,
 	})
-
-  store.addTodo(todo, date.value)
+  store.addTodo(todo);
 }
 
 const handleTodoClick = (todo: TodoItem) => {
@@ -189,7 +177,7 @@ const handleDelete = (todo: TodoItem) => {
   store.updateTodo({ ...todo, active: 0  });
 }
 
-const getFormatDate = (date: string) => formatDate(date);
+const getFormatDate = (date: string) => getDisplayDate(date);
 </script>
 
 <style lang="less">

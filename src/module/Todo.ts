@@ -1,11 +1,16 @@
-import { createUuid } from "../util";
-import { TodoItem } from "../defination/todo";
+import {createUuid} from "../util";
+import {TodoItem} from "../defination/todo";
+import {RemindTiming, RepeatDuration} from "../defination/date";
+import {Priority} from "../defination/priority";
 
 class Todo implements TodoItem {
 
 	key: string;
-	level: string;
-	date: string;
+	priority: Priority;
+	startDate: string;
+	endDate: string;
+	repeatDuration: RepeatDuration;
+	remindTiming: RemindTiming;
 	content: string;
 	progress: number;
 	active: number;
@@ -13,11 +18,16 @@ class Todo implements TodoItem {
 	description?: string;
 	parentKey?: string;
 
-	constructor(obj: Pick<TodoItem, 'level' | 'date' | 'content' | 'description' | 'parentKey'>) {
-		const { level, date, content, description, parentKey } = obj;
+	constructor(obj: Omit<TodoItem, 'key' | 'createTime' | 'progress' | 'active'>) {
+
+		const { priority, startDate, endDate, repeatDuration, remindTiming,  content, description, parentKey } = obj;
+
 		this.key = createUuid();
-		this.level = level;
-		this.date = date;
+		this.priority = priority;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.repeatDuration = repeatDuration || RepeatDuration.EveryDay;
+		this.remindTiming = remindTiming || RemindTiming.OnDay;
 		this.content = content;
 		this.progress = 0;
 		this.active = 1;

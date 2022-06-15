@@ -1,18 +1,18 @@
 <template>
 	<a-popover trigger="click" position="bl" :arrow-style="{ display: 'none' }" ref="priorityPop">
 		<div class="input-prefix">
-			<i class="iconfont icon-youxianji icon" :class="currentPriority"></i>
+			<i class="iconfont icon-youxianji icon" :style="getStyle(modelValue)"></i>
 		</div>
 		<template #content>
 			<div class="priority-wrapper">
 				<div
-						v-for="priority in priorityList"
-						:key="priority.key"
-						:class="priority.key"
+						v-for="item in priorityList"
+						:key="item.key"
+						:style="getStyle(item.key)"
 						class="priority-item"
-						@click="handleItemClick(priority)">
+						@click="handleItemClick(item)">
 					<i class="iconfont icon-youxianji icon priority-label" />
-					{{ priority.title }}
+					{{ item.title }}
 				</div>
 			</div>
 		</template>
@@ -20,25 +20,31 @@
 </template>
 
 <script lang="ts" setup>
-import { PriorityItem } from "../defination/priority";
-import {computed, reactive, ref, defineEmits} from "vue";
+import {Priority, PriorityColorMap, PriorityItem} from "../defination/priority";
+import {reactive, ref, defineEmits} from "vue";
 import PriorityList from "../defination/priority";
 
 interface Props {
-	priority: PriorityItem
+	modelValue: Priority
 }
-
 const props = defineProps<Props>();
-const currentPriority = computed(() => props.priority?.key);
+const emits = defineEmits(['update:modelValue']);
+
 const priorityList = reactive(PriorityList);
 
 const priorityPop = ref(null);
 
-const emit = defineEmits(['change']);
 const handleItemClick = (priority: PriorityItem) => {
-	emit('change', priority);
+	console.log(props.modelValue, '++++++++++')
+	emits('update:modelValue', priority.key);
+
 	priorityPop.value?.handlePopupVisibleChange(false);
-}
+};
+
+const getStyle = (priority: Priority) => {
+	// console.log(PriorityColorMap)
+	return `color: ${PriorityColorMap.get(priority)}`;
+};
 </script>
 
 <style lang="less" scoped>

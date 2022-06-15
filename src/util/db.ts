@@ -1,6 +1,6 @@
 import { useObservable } from '@vueuse/rxjs';
 import dayjs from 'dayjs';
-import Dexie, { liveQuery, Table } from 'dexie';
+import Dexie, {liveQuery, Observable, Table} from 'dexie';
 import { TodoItem } from '../defination/todo';
 
 
@@ -12,21 +12,21 @@ export class MySubClassedDexie extends Dexie {
   constructor() {
     super('myDatabase');
     this.version(1).stores({
-      todos: 'key, date, parentKey, progress, active, createTime' // Primary key and indexed props
+      todos: 'key, startDate, endDate, repeatDuration, remindTiming, parentKey, progress, active, createTime' // Primary key and indexed props
     });
   }
 
-  getTodayTodos() {
+  getTodayTodos(): Observable<TodoItem[]> {
     const date = dayjs().format('YYYY-MM-DD');
     return liveQuery(() => {
       return this.todos
-      .where("date")
-      .equals(date)
-      .sortBy('createTime');
+        .where("date")
+        .equals(date)
+        .sortBy('createTime');
     });
   }
 
-  getLast7daysTodos() {
+  getLast7daysTodos(): Observable<TodoItem[]> {
     const endDate = dayjs().format('YYYY-MM-DD');
     const dates = [endDate];
 
@@ -36,34 +36,33 @@ export class MySubClassedDexie extends Dexie {
     }
     return liveQuery(() => {
       return this.todos
-      .where("date")
-      .anyOf(dates)
-      .sortBy('createTime');
+        .where("date")
+        .anyOf(dates)
+        .sortBy('createTime');
     });
   }
 
-  getFinishedTodos() {
+  getFinishedTodos(): Observable<TodoItem[]> {
     return liveQuery(() => {
       return this.todos
-      .where("progress")
-      .equals(100)
-      .sortBy('createTime');
+        .where("progress")
+        .equals(100)
+        .sortBy('createTime');
     });
   }
 
-  getDeletedTodos() {
+  getDeletedTodos(): Observable<TodoItem[]> {
     return liveQuery(() => {
       return this.todos
-      .where("active")
-      .equals(0)
-      .sortBy('createTime');
+        .where("active")
+        .equals(0)
+        .sortBy('createTime');
     });
   }
 
-  getAllTodos() {
+  getAllTodos(): Observable<TodoItem[]> {
     return liveQuery(() => {
-      return this.todos
-      .toArray();
+      return this.todos.toArray();
     });
   }
 }

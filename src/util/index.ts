@@ -9,10 +9,18 @@ export const createUuid = () => {
 }
 
 export const getDisplayDate = (date: string) => {
-  if (date === dayjs().format('YYYY-MM-DD')) {
+  const today = dayjs();
+  const targetDate = dayjs(date).format('YYYY-MM-DD');
+  if (targetDate === today.format('YYYY-MM-DD')) {
     return '今天';
   }
-  return dayjs(date).format('MM-DD');
+  if (targetDate === today.add(1, 'day').format('YYYY-MM-DD')) {
+    return '明天';
+  }
+  if (targetDate === today.add(2, 'day').format('YYYY-MM-DD')) {
+    return '后天';
+  }
+  return dayjs(date).format('MM/DD');
 }
 
 

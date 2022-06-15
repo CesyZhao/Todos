@@ -1,8 +1,3 @@
-<script setup lang="ts">
-import Menu from './component/Menu.vue';
-import Content from './component/Content.vue';
-</script>
-
 <template>
   <a-layout class="layout-demo">
     <a-layout-sider
@@ -10,8 +5,6 @@ import Content from './component/Content.vue';
       :width="132"
       :collapsed-width="64"
       collapsible
-      :collapsed="collapsed"
-      @collapse="onCollapse"
     >
       <div class="logo" />
       <Menu></Menu>
@@ -26,6 +19,11 @@ import Content from './component/Content.vue';
     </a-layout>
   </a-layout>
 </template>
+
+<script setup lang="ts">
+import Menu from './component/Menu.vue';
+import Content from './component/Content.vue';
+</script>
 
 <style lang="less">
 @import './theme/override.less';

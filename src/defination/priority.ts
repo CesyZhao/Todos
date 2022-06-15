@@ -1,16 +1,16 @@
 export interface PriorityItem {
-  key: string;
+  key: Priority;
   title: string;
 }
 
 export enum Priority {
-	High = 'high',
-	Medium = 'medium',
-	Normal = 'normal',
-	Low = 'low',
+	High,
+	Medium,
+	Normal,
+	Low,
 }
 
-const LevelMap = new Map([
+const PriorityMap = new Map([
 	[Priority.High, '紧急'],
 	[Priority.Medium, '重要'],
 	[Priority.Normal, '一般'],
@@ -22,10 +22,10 @@ const PriorityList: PriorityItem[] = [
 	Priority.Medium,
 	Priority.Normal,
 	Priority.Low,
-].map(level => {
+].map(priority => {
 	return {
-		key: level,
-		title: LevelMap.get(level) || '',
+		key: priority,
+		title: PriorityMap.get(priority) || '',
 	}
 });
 

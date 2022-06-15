@@ -1,6 +1,6 @@
 <template>
   <a-layout class="content" v-if="!isOverview">
-    <a-layout-sider :resize-directions="['right']" :width="360">
+    <a-layout-sider :resize-directions="['right']" :width="420">
       <ContentList />
     </a-layout-sider>
     <a-layout-content>

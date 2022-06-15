@@ -4,14 +4,12 @@
       点击任务查看任务详情
     </div>
     <template v-else>
-      <div class="content-detail-header">
-        <div class="content-detail-date">
-          <IconCalendar />
-          {{ date }}
-        </div>
-      </div>
       <div class="content-detail">
         <input class="content-detail-title" v-model="currentTodo.content" placeholder="请输入任务标题" @input="handleTodoChange" />
+	      <div class="content-detail-header">
+		      <date-picker :model-value="currentTodo" @update:modelValue="handleTodoChange"></date-picker>
+		      <priority-picker :model-value="currentTodo.priority" @update:modelValue="handleTodoChange"></priority-picker>
+	      </div>
         <div id="richText"></div>
         <!-- <a-textarea auto-size class="content-detail-description" v-model="currentTodo.description" placeholder="请输入任务描述"  @input="handleTodoChange"  /> -->
       </div>
@@ -34,11 +32,12 @@ import { computed, nextTick, onMounted, watch } from 'vue-demi';
 import { PriorityColorMap } from '../defination/priority';
 import useContentStore from '../store/content';
 import { TodoItem } from '../defination/todo';
-import { createUuid, generateList } from '../util';
+import {createUuid, generateList, getDisplayDate} from '../util';
 import TodoList from './TodoList.vue';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css'
-import { ref } from 'vue';
+import PriorityPicker from './PriorityPicker.vue';
+import DatePicker from './DatePicker.vue';
 
 const store = useContentStore();
 
@@ -50,7 +49,8 @@ const currentTodo = computed(() => {
 const color = PriorityColorMap.get(currentTodo.value.level);
 
 const date = computed(() => {
-  return currentTodo.value.date === dayjs().format('YYYY-MM-DD') ? '今天' : dayjs(currentTodo.value.date).format('MM-DD');
+	const { startDate, endDate } = currentTodo.value;
+  return getDisplayDate(startDate);
 })
 
 const list = computed(() => {
@@ -76,7 +76,6 @@ const addTodo = (parentTodo: TodoItem) => {
 
 const todoList = computed(() => {
   const newList = generateList(list.value, currentTodo.value.key);
-  console.log(newList, 'new list---------');
   return newList;
 })
 
@@ -106,6 +105,8 @@ watch(currentTodo, () => {
   })
 })
 
+let myAdd: (baseValue: number, increment: number) => number = (x, y) => { return x + y; };
+
 </script>
 
 <style lang="less">
@@ -125,10 +126,8 @@ watch(currentTodo, () => {
   }
   &-header {
     display: flex;
-    margin-bottom: 24px;
-  }
-  &-date {
-    margin-left: 16px;
+	  justify-content: space-between;
+    margin-bottom: 12px;
   }
   &-title, &-description {
     width: 100%;
@@ -139,7 +138,7 @@ watch(currentTodo, () => {
   &-title {
     font-size: 20px;
     font-weight: 500;
-    margin-bottom: 24px;
+    margin-bottom: 12px;
   }
   &-description {
     &:hover {
