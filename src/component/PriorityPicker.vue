@@ -35,7 +35,6 @@ const priorityList = reactive(PriorityList);
 const priorityPop = ref(null);
 
 const handleItemClick = (priority: PriorityItem) => {
-	console.log(props.modelValue, '++++++++++')
 	emits('update:modelValue', priority.key);
 
 	priorityPop.value?.handlePopupVisibleChange(false);

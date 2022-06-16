@@ -7,13 +7,11 @@
       <div class="content-detail">
         <input class="content-detail-title" v-model="currentTodo.content" placeholder="请输入任务标题" @input="handleTodoChange" />
 	      <div class="content-detail-header">
-		      <date-picker :model-value="currentTodo" @update:modelValue="handleTodoChange"></date-picker>
-		      <priority-picker :model-value="currentTodo.priority" @update:modelValue="handleTodoChange"></priority-picker>
+		      <date-picker :model-value="currentTodo" @update:modelValue="handleDateConfigChange"></date-picker>
+		      <priority-picker :model-value="currentTodo.priority" @update:modelValue="handlePriorityChange"></priority-picker>
 	      </div>
         <div id="richText"></div>
-        <!-- <a-textarea auto-size class="content-detail-description" v-model="currentTodo.description" placeholder="请输入任务描述"  @input="handleTodoChange"  /> -->
       </div>
-      <todo-list :list="todoList" @add-sub-todo="addTodo" class="todo-list" />
       <div class="fix-button">
         <a-progress :color="color" :percent="currentTodo.progress" class="title-icon" type="circle" />
         <a-button type="primary" @click="addTodo">
@@ -27,22 +25,22 @@
 </template>
 
 <script lang="ts" setup>
-import dayjs from 'dayjs';
 import { computed, nextTick, onMounted, watch } from 'vue-demi';
-import { PriorityColorMap } from '../defination/priority';
+import {Priority, PriorityColorMap} from '../defination/priority';
 import useContentStore from '../store/content';
 import { TodoItem } from '../defination/todo';
 import {createUuid, generateList, getDisplayDate} from '../util';
-import TodoList from './TodoList.vue';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css'
 import PriorityPicker from './PriorityPicker.vue';
 import DatePicker from './DatePicker.vue';
+import {DateConfig} from "../defination/date";
 
 const store = useContentStore();
 
-const currentTodo = computed(() => {
-  return store.currentTodo;
+const currentTodo = computed({
+	get: () => store.currentTodo,
+	set: (todo) => store.updateTodo(todo),
 })
 
 
@@ -81,7 +79,17 @@ const todoList = computed(() => {
 
 const handleTodoChange = () => {
   store.updateTodo(currentTodo.value);
-}
+};
+
+const handleDateConfigChange = (dateConfig: DateConfig) => {
+	Object.assign(currentTodo.value, dateConfig);
+	handleTodoChange();
+};
+
+const handlePriorityChange = (priority: Priority) => {
+	Object.assign(currentTodo.value, { priority });
+	handleTodoChange();
+};
 
 let quill;
 
@@ -104,8 +112,6 @@ watch(currentTodo, () => {
     quill.setText(currentTodo.value.description || '' + '\n');
   })
 })
-
-let myAdd: (baseValue: number, increment: number) => number = (x, y) => { return x + y; };
 
 </script>
 

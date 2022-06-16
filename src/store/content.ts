@@ -53,7 +53,6 @@ export default defineStore({
     },
 
     setChosenPriority(priority: Priority) {
-      console.log(priority, '---------');
       this.chosenPriority = priority;
     },
 

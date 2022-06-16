@@ -99,7 +99,7 @@ const displayRemindTiming = computed(() => {
 
 const handleChange = (value: string | string[]) => {
 	const [startDate, endDate] = typeof value === 'string' ? [value, value] : value;
-	const dateConfig: DateConfig = Object.assign(props.modelValue, {
+	const dateConfig: DateConfig = Object.assign({}, props.modelValue, {
 		startDate,
 		endDate,
 	});
@@ -107,14 +107,14 @@ const handleChange = (value: string | string[]) => {
 };
 
 const handleRepeatChange = (value: string) => {
-	const dateConfig: DateConfig = Object.assign(props.modelValue, {
+	const dateConfig: DateConfig = Object.assign({}, props.modelValue, {
 		repeatDuration: value
 	});
 	emits('update:modelValue', dateConfig);
 };
 
 const handleRemindChange = (value: string) => {
-	const dateConfig: DateConfig = Object.assign(props.modelValue, {
+	const dateConfig: DateConfig = Object.assign({}, props.modelValue, {
 		remindTiming: value
 	});
 	emits('update:modelValue', dateConfig);

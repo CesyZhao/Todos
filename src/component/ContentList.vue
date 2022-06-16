@@ -136,9 +136,8 @@ watch(todoList, () => {
 })
 
 const addTodo = (content: string) => {
-	console.log(dateConfig.value, '0000')
 	const todo = new Todo({
-		priority: currentPriority.value.key,
+		priority: currentPriority.value,
 		content: isString(content) ? content : input.value,
 		...dateConfig.value,
 	})
