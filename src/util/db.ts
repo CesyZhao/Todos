@@ -20,7 +20,7 @@ export class MySubClassedDexie extends Dexie {
     const date = dayjs().format('YYYY-MM-DD');
     return liveQuery(() => {
       return this.todos
-        .where("date")
+        .where("startDate")
         .equals(date)
         .sortBy('createTime');
     });
@@ -34,9 +34,10 @@ export class MySubClassedDexie extends Dexie {
       dates.unshift(dayjs().subtract(i, 'day').format('YYYY-MM-DD'));
       dates.push(dayjs().add(i, 'day').format('YYYY-MM-DD'));
     }
+
     return liveQuery(() => {
       return this.todos
-        .where("date")
+        .where("startDate")
         .anyOf(dates)
         .sortBy('createTime');
     });
@@ -62,7 +63,7 @@ export class MySubClassedDexie extends Dexie {
 
   getAllTodos(): Observable<TodoItem[]> {
     return liveQuery(() => {
-      return this.todos.toArray();
+      return this.todos.orderBy('createTime').toArray();
     });
   }
 }

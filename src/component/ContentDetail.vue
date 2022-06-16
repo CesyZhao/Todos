@@ -12,6 +12,29 @@
 	      </div>
         <div id="richText"></div>
       </div>
+	    <a-tree
+			    class="todo-list"
+			    :data="todoList"
+			    :checkable="true"
+			    :checked-keys="checkedKeys"
+			    @check="handleSubTodoCheck"
+			    ref="todoListRef" size="mini" block-node>
+		    <template #title="node">
+			    <div class="todo-title-wrapper">
+				    <input
+						    ref="inputRef"
+						    class="todo-title"
+						    placeholder="请输入任务标题"
+						    :class="{ bold: node.progress === undefined }"
+						    v-model="node.content "
+						    @keydown.enter="addTodo('')"
+						    @input="handleSubTodoChange(node)" />
+				    <div class="todo-info" v-if="node.progress !== undefined">
+					    <IconDelete @click="handleDelete(node)" class="icon-delete" size="16" />
+				    </div>
+			    </div>
+		    </template>
+	    </a-tree>
       <div class="fix-button">
         <a-progress :color="color" :percent="currentTodo.progress" class="title-icon" type="circle" />
         <a-button type="primary" @click="addTodo">
@@ -25,16 +48,17 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, watch } from 'vue-demi';
+import { computed, nextTick, watch } from 'vue-demi';
 import {Priority, PriorityColorMap} from '../defination/priority';
 import useContentStore from '../store/content';
 import { TodoItem } from '../defination/todo';
-import {createUuid, generateList, getDisplayDate} from '../util';
+import {getDisplayDate} from '../util';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css'
 import PriorityPicker from './PriorityPicker.vue';
 import DatePicker from './DatePicker.vue';
 import {DateConfig} from "../defination/date";
+import Todo from "../module/Todo";
 
 const store = useContentStore();
 
@@ -44,51 +68,59 @@ const currentTodo = computed({
 })
 
 
-const color = PriorityColorMap.get(currentTodo.value.level);
+const color = PriorityColorMap.get(currentTodo.value.priority);
 
 const date = computed(() => {
-	const { startDate, endDate } = currentTodo.value;
+	const { startDate } = currentTodo.value;
   return getDisplayDate(startDate);
-})
+});
 
 const list = computed(() => {
   return store.todoList.value;
-})
+});
 
 const addTodo = (parentTodo: TodoItem) => {
 
   const todo = parentTodo.key ? parentTodo : currentTodo.value;
 
-  const newTodo = {
-    key: createUuid(),
-    level: todo.level,
-    date: todo.date,
-    content: '',
-    progress: 0,
-    parentKey: todo.key,
-    active: 1
-  }
+	const subTodo = new Todo({...todo, content: '',  parentKey: todo.key});
 
-  store.addTodo(newTodo, currentTodo.value.date);
-}
+  store.addTodo(subTodo);
+};
 
 const todoList = computed(() => {
-  const newList = generateList(list.value, currentTodo.value.key);
-  return newList;
-})
+  return list.value.filter((todo: TodoItem) => {
+		return todo.parentKey === currentTodo.value.key;
+  });
+});
+const checkedKeys = computed(() => {
+	const keys = todoList.value
+			.filter((todo: TodoItem) => todo.progress === 1)
+			.map((todo: TodoItem) => {
+				return todo.key;
+			});
+	return keys;
+});
 
 const handleTodoChange = () => {
-  store.updateTodo(currentTodo.value);
+  store.updateTodo(currentTodo.value, currentTodo.value);
+};
+
+const handleSubTodoChange = (todo: TodoItem) => {
+	store.updateTodo(todo, todo);
+};
+const handleSubTodoCheck = (keys: Array<string>, data: any) => {
+	const { node } = data;
+	store.updateTodo({ ...node, progress: +data.checked }, node);
+	store.updateTodo({ ...currentTodo.value, progress: keys.length / todoList.value.length }, currentTodo.value);
 };
 
 const handleDateConfigChange = (dateConfig: DateConfig) => {
-	Object.assign(currentTodo.value, dateConfig);
-	handleTodoChange();
+	store.updateTodo({ ...currentTodo.value, ...dateConfig }, currentTodo.value);
 };
 
 const handlePriorityChange = (priority: Priority) => {
-	Object.assign(currentTodo.value, { priority });
-	handleTodoChange();
+	store.updateTodo({ ...currentTodo.value, priority }, currentTodo.value);
 };
 
 let quill;

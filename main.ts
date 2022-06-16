@@ -11,7 +11,7 @@ function createWindow () {
   // 创建浏览器窗口
   const mainWindow = new BrowserWindow({
     width: 1024,
-    height: 768,
+    height: 648,
     frame: !isWin,
     titleBarStyle: 'hidden',
     transparent: true,

@@ -49,6 +49,5 @@ export const getListOfDay = (list: TodoItem[], day: string) => {
 }
 
 export const formatDate = (date: string) => {
-  console.log(date, 'date-------');
   return date === dayjs().format('YYYY-MM-DD') ? '今天' : dayjs(date).format('MM-DD');
 }

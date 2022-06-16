@@ -9,33 +9,30 @@
 	      <date-picker v-model="dateConfig"></date-picker>
       </template>
     </a-input>
-    <!-- {{ todoList1 }} -->
-    <!-- <todo-list :list="todoList" @todo-click="handleTodoClick" @add-todo="handleAddTodo" @item-status-change="handleTodoStatusChange" /> -->
-    <a-tree :data="todoList" class="todo-list" :checkable="true" @check="handleTodoStatusChange" :checked-keys="checkedKeys" ref="todoListRef" size="mini" block-node>
-      <!-- <template #switcher-icon>
-        <IconDown />
-      </template> -->
-      <template #switcher-icon>
-        <IconDown />
-      </template>
-      <template #title="node">
-        <div class="todo-title-wrapper" @click="handleTodoClick(node)">
-          <input
-            ref="inputRef"
-            class="todo-title"
-            placeholder="请输入任务标题"
-            :class="{ bold: node.progress === undefined }"
-            :readonly="checkIsReadOnly(node)"
-            v-model="node.content " 
-            @keydown.enter="addTodo('')"
-            @input="handleTodoChange(node)" />
-          <div class="todo-info" v-if="node.progress !== undefined">
-	          <date-picker :model-value="node" @update:modelValue="handleTodoChange(node)"></date-picker>
-            <IconDelete @click="handleDelete(node)" class="icon-delete" />
-          </div>
-        </div>
-      </template>
-    </a-tree>
+	  <div class="content-list-container">
+		  <a-tree :data="todoList" class="todo-list" :checkable="true" @check="handleTodoStatusChange" :checked-keys="checkedKeys" ref="todoListRef" size="mini" block-node>
+			  <template #switcher-icon>
+				  <IconDown />
+			  </template>
+			  <template #title="node">
+				  <div class="todo-title-wrapper" @click="handleTodoClick(node)">
+					  <input
+							  ref="inputRef"
+							  class="todo-title"
+							  placeholder="请输入任务标题"
+							  :class="{ bold: node.progress === undefined }"
+							  :readonly="checkIsReadOnly(node)"
+							  v-model="node.content "
+							  @keydown.enter="addTodo('')"
+							  @input="handleTodoChange(node)" />
+					  <div class="todo-info" v-if="node.progress !== undefined">
+						  <date-picker :model-value="node" @update:modelValue="handleTodoChange(node)"></date-picker>
+						  <IconDelete @click="handleDelete(node)" class="icon-delete" size="16" />
+					  </div>
+				  </div>
+			  </template>
+		  </a-tree>
+	  </div>
   </div>
 </template>
 
@@ -181,7 +178,10 @@ const getFormatDate = (date: string) => getDisplayDate(date);
 
 <style lang="less">
 .content-list-wrapper {
-  padding: 24px;
+	height: calc(100vh - 48px);
+  padding: 24px 24px 0;
+	display: flex;
+	flex-direction: column;
   .input-prefix {
     display: flex;
     align-items: center;
@@ -212,6 +212,7 @@ const getFormatDate = (date: string) => getDisplayDate(date);
 	&:hover {
 		.icon-delete {
 			display: block;
+			margin-left: 8px;
 		}
 	}
   &.finished, &.deleted{
@@ -255,5 +256,9 @@ const getFormatDate = (date: string) => getDisplayDate(date);
   .todo-title-wrapper {
     padding-left: 20px;
   }
+}
+.content-list-container {
+	flex: 1;
+	overflow-y: auto;
 }
 </style>

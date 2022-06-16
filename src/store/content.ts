@@ -11,6 +11,8 @@ import { Message } from '@arco-design/web-vue';
 import {DateConfig} from "../defination/date";
 
 
+let lastUpdateTodoKey;
+
 export default defineStore({
   id: 'contentStore',
 
@@ -56,21 +58,23 @@ export default defineStore({
       this.chosenPriority = priority;
     },
 
-    updateTodo: debounce((todo: TodoItem) => {
+    updateTodo(todo: TodoItem, oldTodo: TodoItem) {
       db.todos.update(todo.key, todo)
         .then(() => {
-          Message.success({
-            content: '任务修改成功',
+          !todo.parentKey && Message.success({
+            content: '任务已更新',
             position: 'bottom'
           })
+          // 直接更新视图上的 todoItem
+          Object.assign(oldTodo, todo);
         })
         .catch(() => {
           Message.error({
-            content: '任务修改失败',
+            content: '任务更新失败',
             position: 'bottom'
           })
         })
-    }, 500),
+    },
 
     addTodo(todo: TodoItem) {
       // const list = this.todoListMap.get(date) || [];
