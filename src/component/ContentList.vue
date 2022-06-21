@@ -56,8 +56,7 @@ const activeMenu = computed(() => store.activeMenu);
 const currentPriority = computed({
 	get: () => store.chosenPriority,
 	set: (priority) => {
-		console.log(priority, '==========');
-		store.setChosenPriority(priority)
+		store.setChosenPriority(priority);
 	},
 });
 
@@ -162,16 +161,16 @@ const handleAddTodo = (todo: TodoItem) => {
 const handleTodoStatusChange = (checkedKeys: string[], event: any) => {
   const { checked, node } = event;
   node.progress = checked ? 100 : 0;
-  store.updateTodo(node);
+  store.updateTodo(node, node);
 }
 
 const handleTodoChange = (todo: TodoItem) => {
-  store.updateTodo(todo);
-}
+  store.updateTodo(todo, todo);
+};
 
 const handleDelete = (todo: TodoItem) => {
-  store.updateTodo({ ...todo, active: 0  });
-}
+  store.updateTodo({ ...todo, active: 0  }, todo);
+};
 
 const getFormatDate = (date: string) => getDisplayDate(date);
 </script>

@@ -5,38 +5,43 @@
     </div>
     <template v-else>
       <div class="content-detail">
-        <input class="content-detail-title" v-model="currentTodo.content" placeholder="请输入任务标题" @input="handleTodoChange" />
+	      <div class="title-container">
+		      <a-checkbox class="todo-checkbox" :indeterminate="indeterminate"></a-checkbox>
+		      <input class="content-detail-title" v-model="currentTodo.content" placeholder="请输入任务标题" @input="handleTodoChange" />
+	      </div>
 	      <div class="content-detail-header">
 		      <date-picker :model-value="currentTodo" @update:modelValue="handleDateConfigChange"></date-picker>
 		      <priority-picker :model-value="currentTodo.priority" @update:modelValue="handlePriorityChange"></priority-picker>
 	      </div>
-        <div id="richText"></div>
       </div>
-	    <a-tree
-			    class="todo-list"
-			    :data="todoList"
-			    :checkable="true"
-			    :checked-keys="checkedKeys"
-			    @check="handleSubTodoCheck"
-			    ref="todoListRef" size="mini" block-node>
-		    <template #title="node">
-			    <div class="todo-title-wrapper">
-				    <input
-						    ref="inputRef"
-						    class="todo-title"
-						    placeholder="请输入任务标题"
-						    :class="{ bold: node.progress === undefined }"
-						    v-model="node.content "
-						    @keydown.enter="addTodo('')"
-						    @input="handleSubTodoChange(node)" />
-				    <div class="todo-info" v-if="node.progress !== undefined">
-					    <IconDelete @click="handleDelete(node)" class="icon-delete" size="16" />
+	    <div class="content">
+		    <div id="richText"></div>
+		    <a-tree
+				    class="todo-list"
+				    :data="todoList"
+				    :checkable="true"
+				    :checked-keys="checkedKeys"
+				    @check="handleSubTodoCheck"
+				    ref="todoListRef" size="mini" block-node>
+			    <template #title="node">
+				    <div class="todo-title-wrapper">
+					    <input
+							    ref="inputRef"
+							    class="todo-title"
+							    placeholder="请输入任务标题"
+							    :class="{ bold: node.progress === undefined }"
+							    v-model="node.content "
+							    @keydown.enter="addTodo('')"
+							    @input="handleSubTodoChange(node)" />
+					    <div class="todo-info" v-if="node.progress !== undefined">
+						    <IconDelete @click="handleDelete(node)" class="icon-delete" size="16" />
+					    </div>
 				    </div>
-			    </div>
-		    </template>
-	    </a-tree>
+			    </template>
+		    </a-tree>
+	    </div>
       <div class="fix-button">
-        <a-progress :color="color" :percent="currentTodo.progress" class="title-icon" type="circle" />
+        <a-progress :color="color" size="mini" :percent="currentTodo.progress" class="title-icon" type="circle" />
         <a-button type="primary" @click="addTodo">
           <template #icon>
             <icon-plus />
@@ -68,7 +73,7 @@ const currentTodo = computed({
 })
 
 
-const color = PriorityColorMap.get(currentTodo.value.priority);
+const color = computed(() => PriorityColorMap.get(currentTodo.value.priority));
 
 const date = computed(() => {
 	const { startDate } = currentTodo.value;
@@ -100,6 +105,9 @@ const checkedKeys = computed(() => {
 				return todo.key;
 			});
 	return keys;
+});
+const indeterminate = computed(() => {
+	return checkedKeys.value.length && checkedKeys.value.length !== todoList.value.length;
 });
 
 const handleTodoChange = () => {
@@ -139,9 +147,12 @@ watch(currentTodo, () => {
           },
         placeholder: '请输入任务描述',
         theme: 'snow'
-      })
+      });
+			quill.on('text-change', (delta: any, oldContent: any, source: string) => {
+				source === 'user' && store.updateTodo({ ...currentTodo.value, description: JSON.stringify(quill.getContents()) }, currentTodo.value );
+			})
     }
-    quill.setText(currentTodo.value.description || '' + '\n');
+    quill.setContents(JSON.parse(currentTodo.value.description));
   })
 })
 
@@ -150,7 +161,7 @@ watch(currentTodo, () => {
 <style lang="less">
 .content-detail {
   &-wrapper {
-    height: 100%;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     padding: 24px;
@@ -165,8 +176,18 @@ watch(currentTodo, () => {
   &-header {
     display: flex;
 	  justify-content: space-between;
-    margin-bottom: 12px;
+	  margin-bottom: 12px;
   }
+	.title-container {
+		display: flex;
+		align-items: center;
+		margin-bottom: 12px;
+	}
+	.todo-checkbox {
+		margin-left: 0;
+		padding-left: 0;
+		margin-right: 8px;
+	}
   &-title, &-description {
     width: 100%;
     border: none;
@@ -176,7 +197,7 @@ watch(currentTodo, () => {
   &-title {
     font-size: 20px;
     font-weight: 500;
-    margin-bottom: 12px;
+    //margin-bottom: 12px;
   }
   &-description {
     &:hover {
@@ -200,5 +221,11 @@ watch(currentTodo, () => {
 }
 #richText {
   border: none;
+}
+.content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow-y: auto;
 }
 </style>
