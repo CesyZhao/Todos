@@ -6,7 +6,7 @@
     <template v-else>
       <div class="content-detail">
 	      <div class="title-container">
-		      <a-checkbox class="todo-checkbox" :indeterminate="indeterminate"></a-checkbox>
+		      <a-checkbox class="todo-checkbox" :indeterminate="indeterminate" v-model="allDone"></a-checkbox>
 		      <input class="content-detail-title" v-model="currentTodo.content" placeholder="请输入任务标题" @input="handleTodoChange" />
 	      </div>
 	      <div class="content-detail-header">
@@ -41,7 +41,7 @@
 		    </a-tree>
 	    </div>
       <div class="fix-button">
-        <a-progress :color="color" size="mini" :percent="currentTodo.progress" class="title-icon" type="circle" />
+        <a-progress size="small" :percent="currentTodo.progress" class="title-icon" type="circle" />
         <a-button type="primary" @click="addTodo">
           <template #icon>
             <icon-plus />
@@ -109,6 +109,17 @@ const checkedKeys = computed(() => {
 const indeterminate = computed(() => {
 	return checkedKeys.value.length && checkedKeys.value.length !== todoList.value.length;
 });
+const allDone = computed({
+	get() {
+		return !!currentTodo.value.progress;
+	},
+	set(value: boolean) {
+		store.updateTodo({ ...currentTodo.value, progress: +value }, currentTodo.value);
+		todoList.value.forEach((todo: TodoItem) => {
+			store.updateTodo({ ...todo, progress: +value }, todo);
+		})
+	}
+})
 
 const handleTodoChange = () => {
   store.updateTodo(currentTodo.value, currentTodo.value);
@@ -152,7 +163,7 @@ watch(currentTodo, () => {
 				source === 'user' && store.updateTodo({ ...currentTodo.value, description: JSON.stringify(quill.getContents()) }, currentTodo.value );
 			})
     }
-    quill.setContents(JSON.parse(currentTodo.value.description));
+    quill.setContents(currentTodo.value.description ? JSON.parse(currentTodo.value.description) : {});
   })
 })
 
@@ -164,7 +175,7 @@ watch(currentTodo, () => {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    padding: 24px;
+    padding: 24px 24px 0;
     box-sizing: border-box;
     .empty {
       flex: 1;
@@ -212,6 +223,9 @@ watch(currentTodo, () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+	margin: 0 -24px;
+	padding: 12px;
+	border-top: 1px solid #eee;
 }
 .ql-toolbar {
   // margin: 0  -24px;

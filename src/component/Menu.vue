@@ -16,6 +16,7 @@
 import menus from '../defination/menu';
 import { reactive } from 'vue';
 import useContentStore from '../store/content';
+import {TodoItem} from "../defination/todo";
 
 const menuList = reactive(menus);
 
@@ -24,6 +25,7 @@ const store = useContentStore();
 const onClickMenuItem = (key: string) => {
   const menuItem = menus.find(m => m.key === key) || menus[0];
   store.changeActiveMenu(menuItem);
+	store.setCurrentTodo({} as TodoItem);
 }
 
 </script>

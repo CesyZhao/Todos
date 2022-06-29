@@ -2,7 +2,7 @@
 	<a-popover trigger="click" position="bottom" :arrow-style="{display: 'none'}">
 		<span class="text">
 			<icon-calendar></icon-calendar>
-			{{ displayText }}
+			<span :class="{ 'is-overdue': isOverDue }" >{{ displayText }}</span>
 		</span>
 		<template #content>
 			<div class="content-wrapper">
@@ -84,6 +84,11 @@ const displayText = computed(() => {
 	return startDate === endDate ? getDisplayDate(startDate) : `${dayjs(startDate).format('MM/DD')} - ${dayjs(endDate).format('MM/DD')}`;
 });
 
+const isOverDue = computed(() => {
+	const { startDate } = props.modelValue;
+	return dayjs().isAfter(dayjs(startDate), 'day');
+});
+
 const displayRepeatDuration = computed(() => {
 	const { modelValue } = props;
 	const { repeatDuration } = modelValue || {}
@@ -147,5 +152,11 @@ const handleRemindChange = (value: string) => {
 
 .text {
 	cursor: pointer;
+	span {
+		margin-left: 4px;
+	}
+}
+.is-overdue {
+	color: red;
 }
 </style>

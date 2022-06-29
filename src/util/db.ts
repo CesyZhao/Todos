@@ -20,7 +20,7 @@ export class MySubClassedDexie extends Dexie {
     const date = dayjs().format('YYYY-MM-DD');
     return liveQuery(() => {
       return this.todos
-        .where("startDate")
+        .where("endDate")
         .equals(date)
         .sortBy('createTime');
     });

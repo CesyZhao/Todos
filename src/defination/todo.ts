@@ -11,3 +11,5 @@ export interface TodoItem extends DateConfig{
   description?: string;
   parentKey?: string;
 }
+
+export const IS_TODO_FINISHED = 100;

@@ -13,6 +13,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { ref, watch, nextTick, computed } from 'vue';
 import { TodoItem } from '../defination/todo';
 import { PriorityColorMap } from '../defination/priority';
+import dayjs from "dayjs";
 
 interface Props {
   todoList: TodoItem[];
@@ -26,14 +27,25 @@ const opts = computed(() => {
     plugins: [ dayGridPlugin, interactionPlugin ],
     locale: cnLocale,
     initialView: 'dayGridMonth',
-    eventBackgroundColor: '#aaa',
     eventBorderColor: 'transparent',
     dayMaxEventRows: 3,
-    events: props.todoList,
+    events: convertEvents(props.todoList),
     moreLinkClick: handleMoreClick,
     eventsSet: rendeEventsBackground
   }
-})
+});
+
+const convertEvents = (todoList: TodoItem[]) => {
+	return todoList.map(item => {
+		return {
+			...item,
+			start: item.startDate,
+			end: dayjs(item.endDate).add(1, 'day').format('YYYY-MM-DD'),
+			display: 'block',
+			backgroundColor: PriorityColorMap.get(item.priority)
+		}
+	})
+}
 
 const handleMoreClick = () => {
   setTimeout(() => rendeEventsBackground(document.querySelector('.fc-popover-body')));
@@ -45,7 +57,7 @@ const rendeEventsBackground = (wrapper: any) => {
     for (const item of props.todoList) {
       const dom = wrapper.querySelector(`.${item.className}`);
       const div = document.createElement('div');
-      div.style = `position: absolute; left: 0; top: 0; width: ${item.progress}%; height: 100%; background: ${PriorityColorMap.get(item.level)}`
+      // div.style = `position: absolute; left: 0; top: 0; width: ${item.progress}%; height: 100%; background: ${PriorityColorMap.get(item.priority)}`
       dom?.appendChild(div);
     }
   })

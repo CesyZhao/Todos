@@ -15,7 +15,7 @@
 				  <IconDown />
 			  </template>
 			  <template #title="node">
-				  <div class="todo-title-wrapper" @click="handleTodoClick(node)">
+				  <div class="todo-title-wrapper" :class="getItemStyle(node)" @click="handleTodoClick(node)">
 					  <input
 							  ref="inputRef"
 							  class="todo-title"
@@ -26,7 +26,9 @@
 							  @keydown.enter="addTodo('')"
 							  @input="handleTodoChange(node)" />
 					  <div class="todo-info" v-if="node.progress !== undefined">
-						  <date-picker :model-value="node" @update:modelValue="handleTodoChange(node)"></date-picker>
+						  <date-picker
+								  :model-value="node"
+								  @update:modelValue="handleTodoChange(node)"></date-picker>
 						  <IconDelete @click="handleDelete(node)" class="icon-delete" size="16" />
 					  </div>
 				  </div>
@@ -40,7 +42,7 @@
 import useContentStore from '../store/content';
 import { computed, nextTick, ref, watch } from 'vue';
 import { PriorityItem } from '../defination/priority';
-import { TodoItem } from '../defination/todo';
+import {IS_TODO_FINISHED, TodoItem} from '../defination/todo';
 import { createUuid, getDisplayDate } from '../util';
 import { Menu } from '../defination/menu';
 import { formatDate } from '../util';
@@ -48,6 +50,7 @@ import { isString } from 'lodash';
 import Todo from '../module/Todo';
 import DatePicker from './DatePicker.vue';
 import PriorityPicker from './PriorityPicker.vue';
+import dayjs from "dayjs";
 
 const store = useContentStore();
 
@@ -65,6 +68,11 @@ const dateConfig = computed({
   set: (val) => store.setDateConfig(val)
 });
 
+const getItemStyle = (todo: TodoItem) => {
+	const { progress } = todo;
+	return progress === IS_TODO_FINISHED ? 'finished' : '';
+};
+
 const input = ref('');
 const checkedKeys = ref<string[]>([]);
 const todoList = computed(() => {
@@ -78,6 +86,13 @@ const todoList = computed(() => {
     checkable: false,
   }
 
+	const overdueTodo = {
+		key: 'overdue',
+		content: '已逾期',
+		children: [] as TodoItem[],
+		checkable: false,
+	}
+
   const todos: TodoItem[] = store.todoList.value || [];
 
   const tempMap = {} as Record<string, any>;
@@ -86,17 +101,22 @@ const todoList = computed(() => {
   const isNotMenuDelete = key !== Menu.Deleted;
 
   for (const todo of todos) {
-    const { startDate } = todo;
+    const { endDate } = todo;
     if (todo.parentKey || (!todo.active && isNotMenuDelete)) continue;
-    if (todo.progress === 100 && isNotMenuDone) {
+    if (todo.progress === IS_TODO_FINISHED && isNotMenuDone) {
       checkedKeys.value.push(todo.key);
       finishedTodo.children.push(todo);
       continue;
     }
-    if (!tempMap[startDate]) {
-      tempMap[startDate] = []
+		const today = dayjs();
+	  if (today.isAfter(dayjs(todo.endDate), 'day') && isNotMenuDone) {
+		  overdueTodo.children.push(todo);
+		  continue;
+	  }
+    if (!tempMap[endDate]) {
+      tempMap[endDate] = []
     }
-    tempMap[startDate].push(todo);
+    tempMap[endDate].push(todo);
   }
 
   const entries = Object.entries(tempMap);
@@ -113,8 +133,9 @@ const todoList = computed(() => {
       tree.push(groupTodo);
     }
   }
-
-  finishedTodo.children.length && tree.push(finishedTodo);
+	overdueTodo.children.length && tree.push(overdueTodo);
+	finishedTodo.children.length && tree.push(finishedTodo);
+	console.log(checkedKeys.value, '------')
   return tree;
 });
 
@@ -216,7 +237,7 @@ const getFormatDate = (date: string) => getDisplayDate(date);
 	}
   &.finished, &.deleted{
     color: #aaa;
-    .todo-title {
+    * {
       color: #aaa !important;
     }
   }

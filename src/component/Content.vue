@@ -32,13 +32,15 @@ const todoList = computed(() => {
     return !item.parentKey
   })
   .map((item: TodoItem) => {
-    const { content, date, key, progress, level } = item;
+    const { content, startDate, endDate, key, progress, priority } = item;
     return {
+			key,
       title: content,
-      date,
+	    startDate,
+	    endDate,
       className: `className-${key}`,
       progress,
-      level
+	    priority
     }
   });
 })

@@ -20,7 +20,7 @@ class Todo implements TodoItem {
 
 	constructor(obj: Omit<TodoItem, 'key' | 'createTime' | 'progress' | 'active'>) {
 
-		const { priority, startDate, endDate, repeatDuration, remindTiming,  content, description, parentKey } = obj;
+		const { priority, startDate, endDate = startDate, repeatDuration, remindTiming,  content, description, parentKey } = obj;
 
 		this.key = createUuid();
 		this.priority = priority;
